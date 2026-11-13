@@ -215,6 +215,12 @@ func (pb PrimaryBuilderFactory) primaryBuilderInvocation(config Config) bootstra
 
 	commonArgs = append(commonArgs, "-l", filepath.Join(pb.config.FileListDir(), "Android.bp.list"))
 	invocationEnv := make(map[string]string)
+	// Preserve explicit host resource limits in the isolated bootstrap command.
+	for _, key := range []string{"GOGC", "GOMEMLIMIT", "GOMAXPROCS"} {
+		if value := os.Getenv(key); value != "" {
+			invocationEnv[key] = value
+		}
+	}
 	if pb.debugPort != "" {
 		//debug mode
 		commonArgs = append(commonArgs, "--delve_listen", pb.debugPort,
